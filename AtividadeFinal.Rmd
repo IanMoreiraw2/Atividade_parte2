@@ -1,0 +1,67 @@
+---
+title: "Final_pequenos_mamiferos"
+author: "Ian Moreira Souza"
+date: "2024-06-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Markdown atividade final - dados Ian
+
+# Este script foi construído a partir de um banco de dados binomial de pequenos mamíferos
+# (roedores e marsupiais) em quatro áreas de amostragem dividas pela BR101/Norte. Esta
+# análise foi pensada para investigar se a presença de passagens inferiores de fauna       # auxiliam a travessia das espécies do grupo sobre estradas entre fragmentos florestais. 
+# Duas dessas áreas apresentam estruturas de passagem de fauna inferiores para os animais  # atravessarem por baixo da estrada e, as outras duas, áreas controle sem as estruturas.
+# O trabalho ocorreu em oito meses, sendo que uma área com estrutura e outra sem, eram     # amostradas juntas. 4 amostragens foram feitas para essas áreas e cada cada uma das 4     # campanhas em cada área foi tratada como uma observação, ou seja, você foi numa dada área # 4 vezes, e a cada vez havia uma chance "p" de você observar algum movimento de travessia # de qualquer pequeno mamífero
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readxl)
+cross2 <- read_excel("cross2.xlsx")
+
+library(stats)
+library(readr)
+library(AICcmodavg)
+library(car)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# foi construido um modelo GLM candidato tendo "Crossings" como variável resposta 
+# binomial (0/1) e "Mitigation" como preditor
+model<-glm(Crossings~Mitigation,data=cross2, family=binomial) 
+
+# e um outro modelo nulo (sem preditor) para comparar com o modelo candidato
+null<-glm(Crossings~1, data=cross2, family=binomial) 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# ver informações
+summary(model)
+summary(null)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# plotando os resíduos
+crPlots(model)     
+Cand.models <- list(model,null)
+
+# A comparação dos modelos por AIC
+aictab(Cand.models,modnames = c("Crossings ~ Mitigation","Crossings ~ 1 (null)")) 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# e comparaçaõ por LRT (que fornece um valor de p)
+lrtest(model,null) 
+
+# O modelo candidato mostrou que "mitigation" tem um efeito positivo (beta +19.06)
+# na probabilidade de observar travessias, então aumenta a chance.
+# Então, incluir a presença/ausência de passagens inferiores explica melhor a chance 
+# de travessias do que o acaso.
